@@ -22,7 +22,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{50, 50, 100, 255}) // Background color
 	rectColor := color.RGBA{255, 0, 0, 255}
-	vector.DrawFilledRect(screen, 50.0, 50.0, 100.0, 100.0, rectColor, false)
+	vector.DrawFilledCircle(screen, 50.0, 50.0, 100.0, rectColor, true)
 	ebitenutil.DebugPrint(screen, "Ebiten WebAssembly is working!") // Test text
 }
 
