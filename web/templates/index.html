@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space Mining Game</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Space Mining</h1>
+            <div class="resources">
+                <span>Minerals: <span id="mineralCount">0</span></span>
+                <span>Drones: <span id="droneCount">0</span></span>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="mining">Mining</button>
+                <button class="tab-btn" data-tab="research">Research</button>
+                <button class="tab-btn" data-tab="market">Market</button>
+            </div>
+            
+            <div class="tab-content" id="mining-tab">
+                <div id="asteroid" class="asteroid"></div>
+                <div class="controls">
+                    <button id="buyDroneBtn">Buy Drone (10 minerals)</button>
+                    <button id="upgradeBtn">Upgrade Mining Power (50 minerals)</button>
+                </div>
+            </div>
+            
+            <div class="tab-content hidden" id="research-tab">
+                <div class="research-grid">
+                    <!-- Research items will be dynamically added here -->
+                </div>
+            </div>
+            
+            <div class="tab-content hidden" id="market-tab">
+                <div class="market-orders">
+                    <div class="buy-orders">
+                        <h3>Buy Orders</h3>
+                        <div id="buyOrdersList"></div>
+                    </div>
+                    <div class="sell-orders">
+                        <h3>Sell Orders</h3>
+                        <div id="sellOrdersList"></div>
+                    </div>
+                </div>
+                <div class="place-order">
+                    <h3>Place Order</h3>
+                    <form id="orderForm">
+                        <select id="orderType">
+                            <option value="BUY">Buy</option>
+                            <option value="SELL">Sell</option>
+                        </select>
+                        <input type="number" id="orderAmount" placeholder="Amount">
+                        <input type="number" id="orderPrice" placeholder="Price per unit">
+                        <button type="submit">Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/game.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/research.js"></script>
+    <script src="/static/js/market.js"></script>
+</body>
+</html>

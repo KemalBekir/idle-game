@@ -1,0 +1,71 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #1a1a2e;
+    color: #e1e1e1;
+}
+
+.game-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.resources {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 1.2em;
+}
+
+.game-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+}
+
+.asteroid {
+    width: 150px;
+    height: 150px;
+    background-image: url('/static/assets/sprites/asteroid.png');
+    background-size: contain;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.asteroid:hover {
+    transform: scale(1.1);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4a4a8e;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #6a6aae;
+}
+
+button:disabled {
+    background-color: #3a3a5e;
+    cursor: not-allowed;
+}
