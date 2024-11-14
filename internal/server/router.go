@@ -1,12 +1,13 @@
 package server
 
 import (
-	"encoding/json"
+	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/KemalBekir/idle-game/internal/config"
 	"github.com/KemalBekir/idle-game/internal/game/services"
-	"github.com/KemalBekir/idle-game/internal/server/handlers"
 )
 
 type Server struct {
@@ -33,37 +34,33 @@ func NewServer(
 func (s *Server) setupRoutes() http.Handler {
 	mux := http.NewServeMux()
 
-	// Create handlers
-	miningHandler := handlers.NewMiningHandler(s.miningService)
-	upgradeHandler := handlers.NewUpgradeHandler(s.upgradeService)
+	// Serve the index.html template when the root is accessed
+	mux.HandleFunc("/", s.renderIndexPage)
 
-	// API routes
-	mux.HandleFunc("/api/mine", (miningHandler.HandleMine))
-	mux.HandleFunc("/api/upgrade", (upgradeHandler.HandleUpgrade))
-	mux.HandleFunc("/api/state", (s.handleGameState))
-
-	// Serve static files
+	// Serve static files like CSS, JS, etc.
 	fileServer := http.FileServer(http.Dir("web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 
 	return mux
 }
 
-func (s *Server) Start() error {
-	handler := s.setupRoutes()
-	println("Server starting....")
-	return http.ListenAndServe(s.config.Address, handler)
-}
+func (s *Server) renderIndexPage(w http.ResponseWriter, r *http.Request) {
 
-func (s *Server) handleGameState(w http.ResponseWriter, r *http.Request) {
-	// Fetch game state from the service
-	gameState, err := s.gameStateService.GetGameState()
+	// Load the template
+	tmpl, err := template.ParseFiles("web/templates/index.html")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Fatalf("Error loading template: %v", err)
 	}
 
-	// Respond with the game state
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(gameState)
+	// Execute the template
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Fatalf("Error executing template: %v", err)
+	}
+}
+
+func (s *Server) Start() error {
+	handler := s.setupRoutes()
+	fmt.Println("Server starting....")
+	return http.ListenAndServe(s.config.Address, handler)
 }
