@@ -61,6 +61,9 @@ func (s *Server) renderIndexPage(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Start() error {
 	handler := s.setupRoutes()
-	fmt.Println("Server starting....")
+
+	fullURL := "http://localhost" + s.config.Address
+
+	fmt.Printf("Server starting at %s\n", fullURL)
 	return http.ListenAndServe(s.config.Address, handler)
 }

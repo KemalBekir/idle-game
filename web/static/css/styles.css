@@ -10,6 +10,8 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
@@ -28,20 +30,37 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 400px;
+    /* height: 400px; */
+    flex-direction: column;
+    position: relative;
+}
+
+.asteroid-container{
+    width: 350px;
+    height: 350px;
 }
 
 .asteroid {
-    width: 150px;
-    height: 150px;
-    background-image: url('/static/assets/sprites/asteroid.png');
-    background-size: contain;
+    width: 100%; /* Adjust the width as needed */
+    height: 100%; /* Adjust the height as needed */
     cursor: pointer;
-    transition: transform 0.1s;
 }
-
 .asteroid:hover {
     transform: scale(1.1);
+}
+
+.tabs {
+
+}
+
+#market-tab {
+    display: flex;
+    flex-direction: column;
+}
+
+.market-orders {
+    display: flex;
+    justify-content: space-around;
 }
 
 .controls {
@@ -49,6 +68,10 @@ body {
     justify-content: center;
     gap: 10px;
     margin-top: 20px;
+}
+
+.place-order h3 {
+    text-align: center;
 }
 
 button {
