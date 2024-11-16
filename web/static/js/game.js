@@ -1,9 +1,13 @@
 class GameController {
     constructor() {
-        this.mineralCountValue = 0; // Keep track of the mineral count as a number
         this.mineralCount = document.getElementById('mineralCount');
         this.droneCount = document.getElementById('droneCount');
         this.asteroid = document.getElementById('asteroid');
+        this.minerals = 0; // Keeps track of the total minerals
+        this.drones = 0;   // Keeps track of the number of drones
+        this.mineralsPerDrone = 0.1; // How much each drone mines per second
+        this.handleMining = this.handleMining.bind(this);
+        this.handleBuyDrone = this.handleBuyDrone.bind(this);
         this.initializeEventListeners();
         this.startGameLoop();
     }
@@ -11,33 +15,49 @@ class GameController {
     initializeEventListeners() {
         this.asteroid.addEventListener('click', () => this.handleMining());
         document.getElementById('buyDroneBtn').onclick = () => this.handleBuyDrone();
+        document.getElementById('upgradeBtn').onClick = () => this.handleReaserch();
     }
 
     handleMining = () => {
-        // Increment the mineral count and update the UI
-        this.mineralCountValue += 1;
-        this.updateMineralCount();
+        this.minerals += 1; // Add 1 mineral per click
+        this.updateUI();
+    }
+
+    handleBuyDrone = () => {
+        
+        if (this.minerals >= 10) {
+            this.minerals -= 10; // Deduct the cost of the drone
+            this.drones += 1;    // Add a new drone
+            this.updateUI();
+        } else {
+            alert('Not enough minerals to buy a drone!');
+        }
+    }
+
+    handleReaserch = () => {
+        if (this.minerals >= 50) {
+            this.minerals -= 50;
+            this.updateUI
+        } else {
+            alert('Not enough minerals to buy this research');
+        }
     }
 
     startGameLoop() {
-        setInterval(() => this.updateGameState(), 1000);
+        setInterval(() => {
+            this.updateGameState();
+        }, 1000); // Runs every second
     }
 
     updateGameState() {
-        // Update the game state as needed
-        // You can fetch data from the server or update the state based on other logic
+        // Add minerals based on the number of drones
+        this.minerals += this.drones * this.mineralsPerDrone;
+        this.updateUI();
     }
 
-    updateUI(gameState) {
-        this.mineralCountValue = gameState.minerals;
-        this.updateMineralCount();
-        this.droneCount.textContent = gameState.drones.length;
-        // Update other UI elements based on game state
-    }
-
-    updateMineralCount = () => {
-        // Display the updated mineral count
-        this.mineralCount.textContent = this.mineralCountValue;
+    updateUI() {
+        this.mineralCount.textContent = Math.floor(this.minerals);
+        this.droneCount.textContent = this.drones;
     }
 }
 
