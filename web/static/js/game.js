@@ -2,42 +2,50 @@ class GameController {
     constructor() {
         this.mineralCount = document.getElementById('mineralCount');
         this.droneCount = document.getElementById('droneCount');
+        this.buyDroneBtn = document.getElementById('buyDroneBtn');
         this.asteroid = document.getElementById('asteroid');
-        this.minerals = 0; // Keeps track of the total minerals
-        this.drones = 0;   // Keeps track of the number of drones
-        this.mineralsPerDrone = 0.1; // How much each drone mines per second
-        this.handleMining = this.handleMining.bind(this);
-        this.handleBuyDrone = this.handleBuyDrone.bind(this);
+        this.minerals = 0;
+        this.drones = 0;
+        this.currentDronePrice = 10; // Starting price
+        this.mineralsPerDrone = 0.1;
         this.initializeEventListeners();
         this.startGameLoop();
+        
+        // Initialize the button text with starting price
+        this.buyDroneBtn.textContent = `Buy Drone (${this.currentDronePrice} minerals)`;
     }
 
     initializeEventListeners() {
         this.asteroid.addEventListener('click', () => this.handleMining());
-        document.getElementById('buyDroneBtn').onclick = () => this.handleBuyDrone();
-        document.getElementById('upgradeBtn').onClick = () => this.handleReaserch();
+        this.buyDroneBtn.addEventListener('click', () => this.handleBuyDrone());
+        document.getElementById('upgradeBtn').addEventListener('click', () => this.handleResearch());
     }
 
     handleMining = () => {
-        this.minerals += 1; // Add 1 mineral per click
+        this.minerals += 1;
         this.updateUI();
     }
 
     handleBuyDrone = () => {
         
-        if (this.minerals >= 10) {
-            this.minerals -= 10; // Deduct the cost of the drone
-            this.drones += 1;    // Add a new drone
+        if (this.minerals >= this.currentDronePrice) {
+            this.minerals -= this.currentDronePrice;
+            this.drones += 1;
+            
+            // Increase price for next purchase
+            this.currentDronePrice = Math.ceil(10 * Math.pow(1.1, this.drones));
+            
+            console.log('New price:', this.currentDronePrice); // Debug log
             this.updateUI();
         } else {
-            alert('Not enough minerals to buy a drone!');
+            alert(`Not enough minerals! Need ${this.currentDronePrice} minerals.`);
         }
-    }
-
-    handleReaserch = () => {
+    };
+    
+    handleResearch = () => {
         if (this.minerals >= 50) {
             this.minerals -= 50;
-            this.updateUI
+            this.updateUI();
         } else {
             alert('Not enough minerals to buy this research');
         }
@@ -46,19 +54,22 @@ class GameController {
     startGameLoop() {
         setInterval(() => {
             this.updateGameState();
-        }, 1000); // Runs every second
+        }, 1000);
     }
 
     updateGameState() {
-        // Add minerals based on the number of drones
-        this.minerals += this.drones * this.mineralsPerDrone;
-        this.updateUI();
+        if (this.drones > 0) {
+            this.minerals += this.drones * this.mineralsPerDrone;
+            this.minerals = Math.round(this.minerals * 10) / 10;
+            this.updateUI();
+        }
     }
 
-    updateUI() {
-        this.mineralCount.textContent = Math.floor(this.minerals);
+    updateUI = () => {
+        this.mineralCount.textContent = this.minerals.toFixed(1);
         this.droneCount.textContent = this.drones;
-    }
+        this.buyDroneBtn.textContent = `Buy Drone (${this.currentDronePrice} minerals)`;
+    };
 }
 
 new GameController();
