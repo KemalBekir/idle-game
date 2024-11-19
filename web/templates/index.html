@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Mining Game</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
@@ -11,6 +13,7 @@
             <div class="resources">
                 <span>Minerals: <span id="mineralCount">0</span></span>
                 <span>Drones: <span id="droneCount">0</span></span>
+                <span>Oil: <span id="oilCount">0</span></span>
             </div>
         </div>
         
@@ -19,57 +22,60 @@
                 <img id="asteroid" class="asteroid" src="/static/assets/asteroid1.png" alt="Asteroid">
             </div>
             <div class="game-menu-container">
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="mining">Mining</button>
-                <button class="tab-btn" data-tab="research">Research</button>
-                <button class="tab-btn" data-tab="market">Market</button>
-            </div>
-            
-            <div class="tab-content" id="mining-tab">
-                <div id="asteroid" class="asteroid"></div>
-                <div class="controls">
-                    <button id="buyDroneBtn">Buy Drone (10 minerals)</button>
-                    <button id="upgradeBtn">Upgrade Mining Power (50 minerals)</button>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="mining">Mining</button>
+                    <button class="tab-btn" data-tab="research">Research</button>
+                    <button class="tab-btn" data-tab="market">Market</button>
                 </div>
-            </div>
-            
-            <div class="tab-content hidden" id="research-tab">
-                <div class="research-grid">
-                    <!-- Research items will be dynamically added here -->
-                </div>
-            </div>
-            
-            <div class="tab-content hidden" id="market-tab">
-                <div class="market-orders">
-                    <div class="buy-orders">
-                        <h3>Buy Orders</h3>
-                        <div id="buyOrdersList"></div>
-                    </div>
-                    <div class="sell-orders">
-                        <h3>Sell Orders</h3>
-                        <div id="sellOrdersList"></div>
+                
+                <div class="tab-content" id="mining-tab">
+                    <div class="controls">
+                        <button id="buyDroneBtn">Buy Drone (10 minerals)</button>
+                        <button id="upgradeBtn">Upgrade Mining Power (50 minerals)</button>
                     </div>
                 </div>
-                <div class="place-order">
-                    <h3>Place Order</h3>
-                    <form id="orderForm">
-                        <select id="orderType">
-                            <option value="BUY">Buy</option>
-                            <option value="SELL">Sell</option>
-                        </select>
-                        <input type="number" id="orderAmount" placeholder="Amount">
-                        <input type="number" id="orderPrice" placeholder="Price per unit">
-                        <button type="submit">Place Order</button>
-                    </form>
+                
+                <div class="tab-content hidden" id="research-tab">
+                    <div class="research-grid">
+                        <!-- Research items will be dynamically added here -->
+                    </div>
+                </div>
+                
+                <div class="tab-content hidden" id="market-tab">
+                    <div class="market-orders">
+                        <div class="buy-orders">
+                            <h3>Buy Orders</h3>
+                            <div id="buyOrdersList"></div>
+                        </div>
+                        <div class="sell-orders">
+                            <h3>Sell Orders</h3>
+                            <div id="sellOrdersList"></div>
+                        </div>
+                    </div>
+                    <div class="place-order">
+                        <h3>Place Order</h3>
+                        <form id="orderForm">
+                            <select id="orderType">
+                                <option value="BUY">Buy</option>
+                                <option value="SELL">Sell</option>
+                            </select>
+                            <input type="number" id="orderAmount" placeholder="Amount">
+                            <input type="number" id="orderPrice" placeholder="Price per unit">
+                            <button type="submit">Place Order</button>
+                        </form>
+                    </div>
+                    <div class="sell-minerals-for-oil">
+                        <h3>Sell Minerals for Oil</h3>
+                        <button id="sellMineralsBtn">Sell 1000 Minerals for 1 Oil</button>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
     
     <script src="/static/js/game.js"></script>
-    <script src="/static/js/websocket.js"></script>
-    <script src="/static/js/research.js"></script>
+    <!-- <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/research.js"></script> -->
     <script src="/static/js/market.js"></script>
 </body>
 </html>

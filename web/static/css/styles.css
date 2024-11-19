@@ -140,6 +140,19 @@ body {
     margin-bottom: 5px;
 }
 
+.sell-minerals-for-oil {
+    margin-left: auto;
+    width: 50%;
+}
+
+.sell-minerals-for-oil h3 {
+    text-align: center;
+}
+
+#sellMineralBtn {
+    width: 100%;
+}
+
 button {
     padding: 10px 20px;
     border: none;

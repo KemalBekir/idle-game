@@ -3,9 +3,11 @@ class GameController {
         this.mineralCount = document.getElementById('mineralCount');
         this.droneCount = document.getElementById('droneCount');
         this.buyDroneBtn = document.getElementById('buyDroneBtn');
+        this.oilCount = document.getElementById('oilCount'); // New element for oil display
         this.asteroid = document.getElementById('asteroid');
-        this.minerals = 0;
+        this.minerals = 1000;
         this.drones = 0;
+        this.oil = 0; // Oil starts at 0
         this.currentDronePrice = 10; // Starting price
         this.mineralsPerDrone = 0.1;
         this.droneProductivityMultiplier = 1; // Multiplier for productivity
@@ -20,6 +22,7 @@ class GameController {
         this.asteroid.addEventListener('click', () => this.handleMining());
         this.buyDroneBtn.addEventListener('click', () => this.handleBuyDrone());
         document.getElementById('upgradeBtn').addEventListener('click', () => this.handleResearch());
+        document.getElementById('sellMineralsBtn').addEventListener('click', () => this.handleSellMinerals()); // Button for selling minerals
     }
 
     handleMining = () => {
@@ -54,6 +57,17 @@ class GameController {
         }
     };
 
+    handleSellMinerals = () => {
+        const requiredMinerals = 1000;
+        if (this.minerals >= requiredMinerals) {
+            this.minerals -= requiredMinerals;
+            this.oil += 1; // Add 1 oil for every 1000 minerals
+            this.updateUI();
+        } else {
+            alert(`Not enough minerals! Need ${requiredMinerals} minerals to get 1 oil.`);
+        }
+    };
+
     startGameLoop() {
         setInterval(() => {
             this.updateGameState();
@@ -73,6 +87,7 @@ class GameController {
         this.mineralCount.textContent = this.minerals.toFixed(1);
         this.droneCount.textContent = this.drones;
         this.buyDroneBtn.textContent = `Buy Drone (${this.currentDronePrice} minerals)`;
+        this.oilCount.textContent = this.oil; // Update oil count display
     };
 }
 
