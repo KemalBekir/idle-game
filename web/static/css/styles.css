@@ -76,6 +76,11 @@ body {
     width: 50%;
     align-items: end;
 }
+
+.research-grid {
+    margin-left: auto;
+    width: 50%;
+}
 /* 
 #mining-tab {
     display: flex;
@@ -149,7 +154,7 @@ body {
     text-align: center;
 }
 
-#sellMineralBtn {
+#sellMineralsBtn {
     width: 100%;
 }
 

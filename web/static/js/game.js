@@ -2,15 +2,18 @@ class GameController {
     constructor() {
         this.mineralCount = document.getElementById('mineralCount');
         this.droneCount = document.getElementById('droneCount');
+        this.oilCount = document.getElementById('oilCount');
         this.buyDroneBtn = document.getElementById('buyDroneBtn');
-        this.oilCount = document.getElementById('oilCount'); // New element for oil display
+        this.sellMineralsBtn = document.getElementById('sellMineralsBtn');
         this.asteroid = document.getElementById('asteroid');
-        this.minerals = 1000;
+        this.minerals = 0;
+        this.oil = 0;
         this.drones = 0;
-        this.oil = 0; // Oil starts at 0
         this.currentDronePrice = 10; // Starting price
         this.mineralsPerDrone = 0.1;
         this.droneProductivityMultiplier = 1; // Multiplier for productivity
+        this.firstResearchCost = 50; // Cost for first research
+        this.secondResearchCost = 100; // Cost for second research
         this.initializeEventListeners();
         this.startGameLoop();
 
@@ -21,8 +24,9 @@ class GameController {
     initializeEventListeners() {
         this.asteroid.addEventListener('click', () => this.handleMining());
         this.buyDroneBtn.addEventListener('click', () => this.handleBuyDrone());
-        document.getElementById('upgradeBtn').addEventListener('click', () => this.handleResearch());
-        document.getElementById('sellMineralsBtn').addEventListener('click', () => this.handleSellMinerals()); // Button for selling minerals
+        this.sellMineralsBtn.addEventListener('click', () => this.handleSellMinerals());
+        document.getElementById('upgradeBtn').addEventListener('click', () => this.handleFirstResearch());
+        document.getElementById('upgradeBtn2').addEventListener('click', () => this.handleSecondResearch());
     }
 
     handleMining = () => {
@@ -44,9 +48,9 @@ class GameController {
         }
     };
 
-    handleResearch = () => {
-        if (this.minerals >= 50) {
-            this.minerals -= 50;
+    handleFirstResearch = () => {
+        if (this.minerals >= this.firstResearchCost) {
+            this.minerals -= this.firstResearchCost;
 
             // Double the productivity of drones
             this.droneProductivityMultiplier *= 2;
@@ -57,14 +61,26 @@ class GameController {
         }
     };
 
-    handleSellMinerals = () => {
-        const requiredMinerals = 1000;
-        if (this.minerals >= requiredMinerals) {
-            this.minerals -= requiredMinerals;
-            this.oil += 1; // Add 1 oil for every 1000 minerals
+    handleSecondResearch = () => {
+        if (this.minerals >= this.secondResearchCost) {
+            this.minerals -= this.secondResearchCost;
+
+            // Increase productivity again (e.g., 1.5x multiplier)
+            this.droneProductivityMultiplier *= 1.5;
+
             this.updateUI();
         } else {
-            alert(`Not enough minerals! Need ${requiredMinerals} minerals to get 1 oil.`);
+            alert('Not enough minerals to buy this research');
+        }
+    };
+
+    handleSellMinerals = () => {
+        if (this.minerals >= 1000) {
+            this.minerals -= 1000;
+            this.oil += 1;
+            this.updateUI();
+        } else {
+            alert('Not enough minerals to sell for oil!');
         }
     };
 
@@ -86,8 +102,8 @@ class GameController {
     updateUI = () => {
         this.mineralCount.textContent = this.minerals.toFixed(1);
         this.droneCount.textContent = this.drones;
+        this.oilCount.textContent = this.oil;
         this.buyDroneBtn.textContent = `Buy Drone (${this.currentDronePrice} minerals)`;
-        this.oilCount.textContent = this.oil; // Update oil count display
     };
 }
 
