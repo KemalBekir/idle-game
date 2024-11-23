@@ -121,30 +121,39 @@ class GameController {
         setInterval(() => {
             const junk = document.createElement('div');
             junk.className = 'space-junk';
-
+            
+            // Set the background image for the junk (adjust path as needed)
+            junk.style.backgroundImage = "url('/static/assets/stargate.png')";
+            junk.style.backgroundSize = "contain";
+            junk.style.backgroundRepeat = "no-repeat";
+            junk.style.width = "100px"; // Adjust dimensions based on your image
+            junk.style.height = "100px";
+            junk.style.position = "absolute";
+    
             const containerWidth = this.spaceJunkContainer.offsetWidth;
             const containerHeight = this.spaceJunkContainer.offsetHeight;
             const randomX = Math.random() * (containerWidth - 50); // Adjust for size
             const randomY = Math.random() * (containerHeight - 50);
-
+    
             junk.style.left = `${randomX}px`;
             junk.style.top = `${randomY}px`;
-
+    
             junk.addEventListener('click', () => {
                 const reward = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000; // 1,000–10,000
                 this.minerals += reward;
-                alert(`You collected space junk and earned ${reward} minerals!`);
+                // alert(`You collected space junk and earned ${reward} minerals!`);
                 this.updateUI();
                 this.spaceJunkContainer.removeChild(junk);
             });
-
+    
             this.spaceJunkContainer.appendChild(junk);
-
+    
             setTimeout(() => {
                 if (junk.parentNode) this.spaceJunkContainer.removeChild(junk);
             }, 10000);
         }, 10000);
     }
+    
 
     updateUI() {
         this.mineralCount.textContent = this.minerals.toFixed(1);
