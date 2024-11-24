@@ -117,42 +117,77 @@ class GameController {
 
     spawnSpaceJunk() {
         console.log("junk appeared");
-        
+    
         setInterval(() => {
+            // Create the junk container
+            const junkContainer = document.createElement('div');
+            junkContainer.style.position = 'absolute';
+    
+            // Create the junk image
             const junk = document.createElement('div');
             junk.className = 'space-junk';
-            
-            // Set the background image for the junk (adjust path as needed)
-            junk.style.backgroundImage = "url('/static/assets/stargate.png')";
+            junk.style.backgroundImage = "url('/static/assets/stargate.png')"; // Ensure the path is correct
             junk.style.backgroundSize = "contain";
             junk.style.backgroundRepeat = "no-repeat";
-            junk.style.width = "100px"; // Adjust dimensions based on your image
-            junk.style.height = "100px";
-            junk.style.position = "absolute";
+            junk.style.width = "120px";
+            junk.style.height = "120px";
     
+            // Create the countdown text
+            const countdown = document.createElement('span');
+            countdown.style.position = 'relative';
+            countdown.style.top = '130px'; // Move the countdown below the image
+            countdown.style.left = '25px'
+            countdown.style.color = 'white';
+            countdown.style.fontSize = '12px';
+            countdown.style.textAlign = 'center';
+    
+            // Position the junk container randomly
             const containerWidth = this.spaceJunkContainer.offsetWidth;
             const containerHeight = this.spaceJunkContainer.offsetHeight;
-            const randomX = Math.random() * (containerWidth - 50); // Adjust for size
-            const randomY = Math.random() * (containerHeight - 50);
+            const randomX = Math.random() * (containerWidth - 50);
+            const randomY = Math.random() * (containerHeight - 70); // Account for junk and text height
     
-            junk.style.left = `${randomX}px`;
-            junk.style.top = `${randomY}px`;
+            junkContainer.style.left = `${randomX}px`;
+            junkContainer.style.top = `${randomY}px`;
     
+            // Attach junk and countdown to the container
+            junkContainer.appendChild(junk);
+            junkContainer.appendChild(countdown);
+            this.spaceJunkContainer.appendChild(junkContainer);
+    
+            // Countdown logic
+            let timeLeft = 10; // 10 seconds
+            countdown.textContent = `Time left: ${timeLeft}s`;
+    
+            const countdownInterval = setInterval(() => {
+                timeLeft -= 1;
+                countdown.textContent = `Time left: ${timeLeft}s`;
+    
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    if (junkContainer.parentNode) {
+                        this.spaceJunkContainer.removeChild(junkContainer);
+                    }
+                }
+            }, 1000);
+    
+            // Handle click on junk
             junk.addEventListener('click', () => {
                 const reward = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000; // 1,000–10,000
                 this.minerals += reward;
-                // alert(`You collected space junk and earned ${reward} minerals!`);
+                alert(`You collected space junk and earned ${reward} minerals!`);
                 this.updateUI();
-                this.spaceJunkContainer.removeChild(junk);
+                clearInterval(countdownInterval);
+                if (junkContainer.parentNode) {
+                    this.spaceJunkContainer.removeChild(junkContainer);
+                }
             });
     
-            this.spaceJunkContainer.appendChild(junk);
-    
-            setTimeout(() => {
-                if (junk.parentNode) this.spaceJunkContainer.removeChild(junk);
-            }, 10000);
-        }, 10000);
+        }, 10000); // Spawn new junk every 10 seconds
     }
+    
+    
+    
     
 
     updateUI() {
