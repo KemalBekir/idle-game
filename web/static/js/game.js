@@ -118,7 +118,20 @@ class GameController {
     spawnSpaceJunk() {
         console.log("junk appeared");
     
-        setInterval(() => {
+        // Define the spawn interval range (in milliseconds)
+        let maxInterval = 7 * 60 * 1000; // 7 minutes
+        const minInterval = 4 * 60 * 1000; // 4 minutes
+    
+        const nextJunkTimer = document.getElementById('nextJunkTimer'); // Timer display element
+        let timerInterval; // Declare a variable to store the timer interval ID
+    
+        // Function to spawn space junk
+        const spawn = () => {
+            // Clear any existing timer interval
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+    
             // Create the junk container
             const junkContainer = document.createElement('div');
             junkContainer.style.position = 'absolute';
@@ -136,7 +149,7 @@ class GameController {
             const countdown = document.createElement('span');
             countdown.style.position = 'relative';
             countdown.style.top = '130px'; // Move the countdown below the image
-            countdown.style.left = '25px'
+            countdown.style.left = '25px';
             countdown.style.color = 'white';
             countdown.style.fontSize = '12px';
             countdown.style.textAlign = 'center';
@@ -175,16 +188,54 @@ class GameController {
             junk.addEventListener('click', () => {
                 const reward = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000; // 1,000–10,000
                 this.minerals += reward;
-                alert(`You collected space junk and earned ${reward} minerals!`);
                 this.updateUI();
+    
+                // Clear the countdown interval for this junk
                 clearInterval(countdownInterval);
                 if (junkContainer.parentNode) {
                     this.spaceJunkContainer.removeChild(junkContainer);
                 }
+    
+                // Immediately schedule the next spawn
+                spawn();
             });
     
-        }, 10000); // Spawn new junk every 10 seconds
+            // Schedule next spawn and display timer
+            const nextInterval = Math.random() * maxInterval + minInterval;
+            let nextJunkTime = Math.floor(nextInterval / 1000); // Convert to seconds
+            nextJunkTimer.textContent = `Next space junk in: ${Math.floor(nextJunkTime / 60)}:${nextJunkTime % 60}`;
+            nextJunkTimer.style.position = 'fixed';
+            nextJunkTimer.style.top = '10px';
+            nextJunkTimer.style.left = '10px';
+    
+            timerInterval = setInterval(() => {
+                nextJunkTime -= 1;
+                const minutes = Math.floor(nextJunkTime / 60);
+                const seconds = nextJunkTime % 60;
+                nextJunkTimer.textContent = `Next space junk in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    
+                if (nextJunkTime <= 0) {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+    
+            setTimeout(spawn, nextInterval);
+        };
+    
+        // Initial spawn
+        spawn();
     }
+    
+    
+    // Research mechanic to reduce max interval
+    spaceJunkDurationResearch() {
+        const researchReduction = 30 * 1000; // Reduce by 30 seconds per research
+        const minInterval = 4 * 60 * 1000; // Minimum 4 minutes
+    
+        this.maxInterval = Math.max(this.maxInterval - researchReduction, minInterval);
+        console.log(`Max interval reduced to: ${this.maxInterval / 1000 / 60} minutes`);
+    }
+    
     
     
     
