@@ -32,8 +32,12 @@ body {
     /* justify-content: center; */
     align-items: center;
     /* height: 400px; */
+    transform-origin: center center;
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
     width: 100%;
-    height: 70vh;
+    height: 100%;
     flex-direction: row;
     justify-content: flex-end;
 }
@@ -56,6 +60,12 @@ body {
 }
 .asteroid:hover {
     transform: scale(1.1);
+}
+
+.zoom-controls {
+    position:fixed;
+    bottom: 14px;
+    left: 45%;
 }
 
 .game-menu-container{

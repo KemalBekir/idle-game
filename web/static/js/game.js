@@ -10,6 +10,10 @@ class GameController {
         this.spaceJunkContainer = document.getElementById('spaceJunkContainer');
         this.researchContainer = document.getElementById('researchGrid');
 
+         // Zoom control elements
+         this.zoomInBtn = document.getElementById('zoomIn');
+         this.zoomOutBtn = document.getElementById('zoomOut');
+
         // Game state
         this.minerals = 0;
         this.oil = 0;
@@ -17,6 +21,12 @@ class GameController {
         this.currentDronePrice = 10;
         this.mineralsPerDrone = 0.1;
         this.droneProductivityMultiplier = 1;
+
+         // Zoom-related properties
+         this.currentZoom = 1; // Default zoom level
+         this.minZoom = 0.5;   // Minimum zoom level
+         this.maxZoom = 2;     // Maximum zoom level
+         this.zoomStep = 0.1;  // Amount to zoom in or out
 
         // Research options
         this.researchOptions = [
@@ -41,6 +51,7 @@ class GameController {
         // Initialize
         this.initializeEventListeners();
         this.initializeResearchButtons();
+        this.initializeZoomControls();
         this.startGameLoop();
         this.spawnSpaceJunk();
 
@@ -63,6 +74,22 @@ class GameController {
             button.addEventListener('click', () => this.handleResearch(research));
             this.researchContainer.appendChild(button);
         });
+    }
+
+    // Initialize zoom controls
+    initializeZoomControls() {
+        this.zoomInBtn.addEventListener('click', () => this.adjustZoom(1));
+        this.zoomOutBtn.addEventListener('click', () => this.adjustZoom(-1));
+    }
+
+     // Adjust zoom level
+     adjustZoom(direction) {
+        const newZoom = this.currentZoom + direction * this.zoomStep;
+
+        if (newZoom >= this.minZoom && newZoom <= this.maxZoom) {
+            this.currentZoom = newZoom;
+            document.querySelector('.game-area').style.transform = `scale(${this.currentZoom})`;
+        }
     }
 
     handleMining = () => {
@@ -121,12 +148,24 @@ class GameController {
         // Define the spawn interval range (in milliseconds)
         let maxInterval = 7 * 60 * 1000; // 7 minutes
         const minInterval = 4 * 60 * 1000; // 4 minutes
+        const cooldownTime = 10 * 1000; // 10 seconds cooldown after junk is clicked
     
         const nextJunkTimer = document.getElementById('nextJunkTimer'); // Timer display element
         let timerInterval; // Declare a variable to store the timer interval ID
+        let cooldownActive = false; // Cooldown flag
     
         // Function to spawn space junk
         const spawn = () => {
+            if (cooldownActive) {
+                // If cooldown is active, schedule next spawn after cooldown ends
+                console.log("Cooldown active, delaying spawn.");
+                setTimeout(() => {
+                    cooldownActive = false;
+                    spawn();
+                }, cooldownTime);
+                return;
+            }
+    
             // Clear any existing timer interval
             if (timerInterval) {
                 clearInterval(timerInterval);
@@ -196,8 +235,14 @@ class GameController {
                     this.spaceJunkContainer.removeChild(junkContainer);
                 }
     
-                // Immediately schedule the next spawn
-                spawn();
+                // Activate cooldown
+                cooldownActive = true;
+                setTimeout(() => {
+                    cooldownActive = false; // Cooldown ends after cooldownTime
+                }, cooldownTime);
+    
+                // Schedule the next spawn after the cooldown
+                setTimeout(spawn, Math.random() * maxInterval + minInterval);
             });
     
             // Schedule next spawn and display timer
@@ -225,6 +270,7 @@ class GameController {
         // Initial spawn
         spawn();
     }
+    
     
     
     // Research mechanic to reduce max interval
