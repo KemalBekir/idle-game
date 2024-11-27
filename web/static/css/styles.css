@@ -215,3 +215,10 @@ button:disabled {
     100% { transform: translateY(-5px); }
 }
 
+
+#spaceMap {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #333;
+    background-color: black;
+}
