@@ -66,6 +66,7 @@ body {
     position:fixed;
     bottom: 14px;
     left: 45%;
+    display: none;
 }
 
 .game-menu-container{
