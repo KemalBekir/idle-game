@@ -21,27 +21,29 @@ class SpaceMap {
         this.canvas.addEventListener('mousedown', this.startPanning.bind(this));
         this.canvas.addEventListener('mousemove', this.handlePanning.bind(this));
         this.canvas.addEventListener('mouseup', this.stopPanning.bind(this));
-    
+
         this.canvas.addEventListener('click', (event) => {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = (event.clientX - rect.left) / this.zoomLevel - this.offsetX;
             const mouseY = (event.clientY - rect.top) / this.zoomLevel - this.offsetY;
-    
-            for (let i = 0; i < this.objects.length; i++) {
-                const obj = this.objects[i];
+
+            this.objects.forEach(obj => {
                 const dx = mouseX - obj.x;
                 const dy = mouseY - obj.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-    
+
                 if (distance <= obj.radius) {
                     console.log(`Mined ${obj.type} (${obj.rarity}) worth ${obj.value} minerals!`);
-                    this.objects.splice(i, 1); // Remove mined object
-                    break;
+                    obj.color = 'yellow'; // Change color to indicate it was clicked.
+                    obj.glow = 'rgba(255, 255, 0, 0.5)'; // Add a glow effect.
                 }
-            }
+            });
         });
+
+
+
     }
-    
+
 
     handleZoom(event) {
         event.preventDefault();
@@ -77,40 +79,46 @@ class SpaceMap {
         this.objects.push({ x, y, radius, color });
     }
 
-    
+
 
     render() {
         console.log('Rendering...');
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
+
         // Apply zoom and pan
         ctx.save();
         ctx.scale(this.zoomLevel, this.zoomLevel);
         ctx.translate(this.offsetX, this.offsetY);
-    
+
         // Draw space objects
         this.objects.forEach(obj => {
-            if (obj.glow) {
+            if (obj.mined) {
+                // Change color or add a visual effect
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; // Example: fade-out effect
+            } else {
+                ctx.fillStyle = obj.color;
+            }
+
+            if (obj.glow && !obj.mined) {
                 ctx.beginPath();
                 ctx.arc(obj.x, obj.y, obj.radius + 5, 0, Math.PI * 2);
                 ctx.fillStyle = obj.glow;
                 ctx.fill();
                 ctx.closePath();
             }
-    
+
             ctx.beginPath();
             ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-            ctx.fillStyle = obj.color;
             ctx.fill();
             ctx.closePath();
         });
-    
+
         ctx.restore();
-    
+
         requestAnimationFrame(this.render.bind(this));
     }
-    
+
 }
 
 
@@ -147,6 +155,7 @@ function generateMineableObjects(numObjects, mapWidth, mapHeight) {
             color: colors[type],
             glow: colors[rarity], // Rarity-based glow color
             value: value * (1 + rarityIndex), // Higher value for rarer resources
+            mined: false,
         });
     }
 
