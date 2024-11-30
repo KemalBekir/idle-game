@@ -1,127 +1,89 @@
 class SpaceMap {
-    constructor(canvasId) {
+    constructor(canvasId, gameController) {
         this.canvas = document.getElementById(canvasId);
+        console.log(canvasId);
+        
         this.ctx = this.canvas.getContext('2d');
-
-        // Game state
-        this.zoomLevel = 1; // Default zoom level
-        this.offsetX = 0; // Pan offset
-        this.offsetY = 0; // Pan offset
-        this.objects = []; // Array of game objects (asteroids, planets, etc.)
-
-        // Event listeners
+        this.gameController = gameController; // Link to GameController
+        this.zoomLevel = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.objects = [];
         this.initializeEventListeners();
-
-        // Start rendering loop
         this.render();
     }
 
     initializeEventListeners() {
-        this.canvas.addEventListener('wheel', this.handleZoom.bind(this));
-        this.canvas.addEventListener('mousedown', this.startPanning.bind(this));
-        this.canvas.addEventListener('mousemove', this.handlePanning.bind(this));
-        this.canvas.addEventListener('mouseup', this.stopPanning.bind(this));
-
         this.canvas.addEventListener('click', (event) => {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = (event.clientX - rect.left) / this.zoomLevel - this.offsetX;
             const mouseY = (event.clientY - rect.top) / this.zoomLevel - this.offsetY;
 
-            this.objects.forEach(obj => {
+            this.objects.forEach((obj, index) => {
                 const dx = mouseX - obj.x;
                 const dy = mouseY - obj.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance <= obj.radius) {
-                    console.log(`Mined ${obj.type} (${obj.rarity}) worth ${obj.value} minerals!`);
-                    obj.color = 'yellow'; // Change color to indicate it was clicked.
-                    obj.glow = 'rgba(255, 255, 0, 0.5)'; // Add a glow effect.
+                    // Deduct minerals
+                    obj.minerals -= 1;
+
+                    console.log(
+                        `Mined 1 mineral from ${obj.type} (${obj.rarity}). Remaining minerals: ${obj.minerals}`
+                    );
+
+                    // Add mined minerals to game controller
+                    this.gameController.addMinerals(1);
+
+                    // If minerals reach 0, remove the object
+                    if (obj.minerals <= 0) {
+                        console.log(`${obj.type} (${obj.rarity}) is depleted and removed.`);
+                        this.objects.splice(index, 1);
+                    }
+
+                    // Optional: Visual feedback
+                    obj.color = 'yellow'; // Change color to show activity
+                    obj.glow = 'rgba(255, 255, 0, 0.5)'; // Highlight mined object
                 }
             });
         });
-
-
-
     }
 
-
-    handleZoom(event) {
-        event.preventDefault();
-        const zoomSpeed = 0.1;
-        const newZoomLevel = this.zoomLevel - event.deltaY * zoomSpeed / 100;
-        this.zoomLevel = Math.max(0.5, Math.min(3, newZoomLevel)); // Limit zoom
+    addObject(x, y, radius, color, value, type, rarity, minerals) {
+        this.objects.push({
+            x, y, radius, color, value, type, rarity, minerals, mined: false
+        });
     }
-
-    startPanning(event) {
-        this.isPanning = true;
-        this.startX = event.clientX;
-        this.startY = event.clientY;
-    }
-
-    handlePanning(event) {
-        if (!this.isPanning) return;
-
-        const dx = event.clientX - this.startX;
-        const dy = event.clientY - this.startY;
-
-        this.offsetX += dx / this.zoomLevel;
-        this.offsetY += dy / this.zoomLevel;
-
-        this.startX = event.clientX;
-        this.startY = event.clientY;
-    }
-
-    stopPanning() {
-        this.isPanning = false;
-    }
-
-    addObject(x, y, radius, color) {
-        this.objects.push({ x, y, radius, color });
-    }
-
-
 
     render() {
-        console.log('Rendering...');
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Apply zoom and pan
         ctx.save();
         ctx.scale(this.zoomLevel, this.zoomLevel);
         ctx.translate(this.offsetX, this.offsetY);
 
-        // Draw space objects
         this.objects.forEach(obj => {
-            if (obj.mined) {
-                // Change color or add a visual effect
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; // Example: fade-out effect
-            } else {
-                ctx.fillStyle = obj.color;
-            }
+            if (!obj.mined) {
+                if (obj.glow) {
+                    ctx.beginPath();
+                    ctx.arc(obj.x, obj.y, obj.radius + 5, 0, Math.PI * 2);
+                    ctx.fillStyle = obj.glow;
+                    ctx.fill();
+                    ctx.closePath();
+                }
 
-            if (obj.glow && !obj.mined) {
+                ctx.fillStyle = obj.color;
                 ctx.beginPath();
-                ctx.arc(obj.x, obj.y, obj.radius + 5, 0, Math.PI * 2);
-                ctx.fillStyle = obj.glow;
+                ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.closePath();
             }
-
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.closePath();
         });
 
         ctx.restore();
-
         requestAnimationFrame(this.render.bind(this));
     }
-
 }
-
-
 
 
 
@@ -146,6 +108,9 @@ function generateMineableObjects(numObjects, mapWidth, mapHeight) {
         const rarityIndex = weightedRandom(rarityWeights);
         const rarity = rarities[rarityIndex];
 
+        // Generate random mineral quantity between 1M and 10M
+        const minerals = Math.floor(Math.random() * (10_000_000 - 1_000_000 + 1)) + 1_000_000;
+
         objects.push({
             x: Math.random() * mapWidth,
             y: Math.random() * mapHeight,
@@ -155,6 +120,7 @@ function generateMineableObjects(numObjects, mapWidth, mapHeight) {
             color: colors[type],
             glow: colors[rarity], // Rarity-based glow color
             value: value * (1 + rarityIndex), // Higher value for rarer resources
+            minerals: minerals, // Assign mineral quantity
             mined: false,
         });
     }
@@ -162,27 +128,22 @@ function generateMineableObjects(numObjects, mapWidth, mapHeight) {
     return objects;
 }
 
+
 function weightedRandom(weights) {
     const sum = weights.reduce((a, b) => a + b, 0);
     const rand = Math.random() * sum;
-
     let cumulative = 0;
+
     for (let i = 0; i < weights.length; i++) {
         cumulative += weights[i];
         if (rand < cumulative) return i;
     }
+
     return weights.length - 1;
 }
 
-const rarityWeights = [0.7, 0.25, 0.05]; // Common, Rare, Legendary
-const typeIndex = weightedRandom(rarityWeights);
-const types = ["common", "rare", "legendary"];
-console.log(types[typeIndex]); // Outputs type based on weight
+const gameController = new GameController();
+const spaceMap = new SpaceMap('canvasId', gameController);
 
-
-// Initialize the space map
-const spaceMap = new SpaceMap('spaceMap');
-
-// Generate and add mineable objects
 const objects = generateMineableObjects(10, spaceMap.canvas.width, spaceMap.canvas.height);
-objects.forEach(obj => spaceMap.addObject(obj.x, obj.y, obj.radius, obj.color));
+objects.forEach(obj => spaceMap.addObject(obj.x, obj.y, obj.radius, obj.color, obj.value, obj.type, obj.rarity));

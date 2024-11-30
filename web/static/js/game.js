@@ -92,6 +92,12 @@ class GameController {
         }
     }
 
+    addMinerals(amount) {
+        this.minerals += amount;
+        this.updateUI();
+    }
+    
+
     handleMining = () => {
         this.minerals += 1;
         this.updateUI();
