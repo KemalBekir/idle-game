@@ -1,19 +1,48 @@
 class SpaceMap {
     constructor(canvasId, gameController) {
         this.canvas = document.getElementById(canvasId);
-        console.log(canvasId);
-        
         this.ctx = this.canvas.getContext('2d');
         this.gameController = gameController; // Link to GameController
-        this.zoomLevel = 1;
-        this.offsetX = 0;
-        this.offsetY = 0;
+        this.zoomLevel = 1; // Default zoom level
+        this.offsetX = 0; // Panning offset X
+        this.offsetY = 0; // Panning offset Y
         this.objects = [];
+        this.hoveredObject = null; // Track the currently hovered object
         this.initializeEventListeners();
         this.render();
     }
 
     initializeEventListeners() {
+        // Zoom in/out using the mouse wheel
+        this.canvas.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const zoomSpeed = 0.1;
+            const zoomDelta = event.deltaY > 0 ? -zoomSpeed : zoomSpeed; // Zoom in or out
+            const newZoomLevel = this.zoomLevel + zoomDelta;
+
+            // Limit zoom level between 0.5x and 3x
+            this.zoomLevel = Math.max(0.5, Math.min(3, newZoomLevel));
+        });
+
+        // Detect hovering over objects
+        this.canvas.addEventListener('mousemove', (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const mouseX = (event.clientX - rect.left) / this.zoomLevel - this.offsetX;
+            const mouseY = (event.clientY - rect.top) / this.zoomLevel - this.offsetY;
+
+            this.hoveredObject = null; // Reset hovered object
+            this.objects.forEach(obj => {
+                const dx = mouseX - obj.x;
+                const dy = mouseY - obj.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance <= obj.radius) {
+                    this.hoveredObject = obj; // Set hovered object
+                }
+            });
+        });
+
+        // Handle click events
         this.canvas.addEventListener('click', (event) => {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = (event.clientX - rect.left) / this.zoomLevel - this.offsetX;
@@ -25,25 +54,19 @@ class SpaceMap {
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance <= obj.radius) {
-                    // Deduct minerals
-                    obj.minerals -= 1;
-
+                    obj.minerals -= 1; // Deduct 1 mineral
                     console.log(
                         `Mined 1 mineral from ${obj.type} (${obj.rarity}). Remaining minerals: ${obj.minerals}`
                     );
 
-                    // Add mined minerals to game controller
+                    // Add mined minerals to the game controller
                     this.gameController.addMinerals(1);
 
-                    // If minerals reach 0, remove the object
+                    // Remove the object if minerals reach 0
                     if (obj.minerals <= 0) {
                         console.log(`${obj.type} (${obj.rarity}) is depleted and removed.`);
                         this.objects.splice(index, 1);
                     }
-
-                    // Optional: Visual feedback
-                    obj.color = 'yellow'; // Change color to show activity
-                    obj.glow = 'rgba(255, 255, 0, 0.5)'; // Highlight mined object
                 }
             });
         });
@@ -51,9 +74,18 @@ class SpaceMap {
 
     addObject(x, y, radius, color, value, type, rarity, minerals) {
         this.objects.push({
-            x, y, radius, color, value, type, rarity, minerals, mined: false
+            x, 
+            y, 
+            radius, 
+            color, 
+            value, 
+            type, 
+            rarity, 
+            minerals: minerals || Math.floor(Math.random() * 10_000_000) + 1, // Default minerals
+            mined: false
         });
     }
+    
 
     render() {
         const ctx = this.ctx;
@@ -62,16 +94,10 @@ class SpaceMap {
         ctx.scale(this.zoomLevel, this.zoomLevel);
         ctx.translate(this.offsetX, this.offsetY);
 
+        // Draw objects
         this.objects.forEach(obj => {
             if (!obj.mined) {
-                if (obj.glow) {
-                    ctx.beginPath();
-                    ctx.arc(obj.x, obj.y, obj.radius + 5, 0, Math.PI * 2);
-                    ctx.fillStyle = obj.glow;
-                    ctx.fill();
-                    ctx.closePath();
-                }
-
+                // Draw the object
                 ctx.fillStyle = obj.color;
                 ctx.beginPath();
                 ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
@@ -80,10 +106,35 @@ class SpaceMap {
             }
         });
 
+        // Draw hover tooltip
+        if (this.hoveredObject) {
+            const obj = this.hoveredObject;
+        
+            // Draw tooltip background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            const text = `${obj.minerals} minerals left`;
+            const textWidth = ctx.measureText(text).width;
+        
+            // Position the tooltip below the object
+            const tooltipX = obj.x - textWidth / 2;
+            const tooltipY = obj.y + obj.radius + 10; // Adjust the offset as needed (10px below the object)
+        
+            // Draw tooltip background
+            ctx.fillRect(tooltipX - 5, tooltipY, textWidth + 10, 20);
+        
+            // Draw tooltip text
+            ctx.fillStyle = 'white';
+            ctx.font = `${12 / this.zoomLevel}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText(text, obj.x, tooltipY + 15); // Adjust text position within the background
+        }
+        
+
         ctx.restore();
         requestAnimationFrame(this.render.bind(this));
     }
 }
+
 
 
 
