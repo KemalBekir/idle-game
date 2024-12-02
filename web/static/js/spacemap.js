@@ -73,16 +73,18 @@ class SpaceMap {
     }
 
     addObject(x, y, radius, color, value, type, rarity, minerals) {
+        const id = `obj-${Date.now()}-${Math.random()}`; // Unique ID
         this.objects.push({
-            x, 
-            y, 
-            radius, 
-            color, 
-            value, 
-            type, 
-            rarity, 
-            minerals: minerals || Math.floor(Math.random() * 10_000_000) + 1, // Default minerals
-            mined: false
+            id,
+            x,
+            y,
+            radius,
+            color,
+            value,
+            type,
+            rarity,
+            minerals: minerals || Math.floor(Math.random() * 10_000_000) + 1,
+            mined: false,
         });
     }
     

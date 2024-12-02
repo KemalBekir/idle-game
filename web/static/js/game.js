@@ -10,9 +10,9 @@ class GameController {
         this.spaceJunkContainer = document.getElementById('spaceJunkContainer');
         this.researchContainer = document.getElementById('researchGrid');
 
-         // Zoom control elements
-         this.zoomInBtn = document.getElementById('zoomIn');
-         this.zoomOutBtn = document.getElementById('zoomOut');
+        // Zoom control elements
+        this.zoomInBtn = document.getElementById('zoomIn');
+        this.zoomOutBtn = document.getElementById('zoomOut');
 
         // Game state
         this.minerals = 0;
@@ -21,12 +21,13 @@ class GameController {
         this.currentDronePrice = 10;
         this.mineralsPerDrone = 0.1;
         this.droneProductivityMultiplier = 1;
+        this.objectDrones = {}; // Tracks drones per object ID
 
-         // Zoom-related properties
-         this.currentZoom = 1; // Default zoom level
-         this.minZoom = 0.5;   // Minimum zoom level
-         this.maxZoom = 2;     // Maximum zoom level
-         this.zoomStep = 0.1;  // Amount to zoom in or out
+        // Zoom-related properties
+        this.currentZoom = 1; // Default zoom level
+        this.minZoom = 0.5;   // Minimum zoom level
+        this.maxZoom = 2;     // Maximum zoom level
+        this.zoomStep = 0.1;  // Amount to zoom in or out
 
         // Research options
         this.researchOptions = [
@@ -82,8 +83,8 @@ class GameController {
         this.zoomOutBtn.addEventListener('click', () => this.adjustZoom(-1));
     }
 
-     // Adjust zoom level
-     adjustZoom(direction) {
+    // Adjust zoom level
+    adjustZoom(direction) {
         const newZoom = this.currentZoom + direction * this.zoomStep;
 
         if (newZoom >= this.minZoom && newZoom <= this.maxZoom) {
@@ -96,7 +97,7 @@ class GameController {
         this.minerals += amount;
         this.updateUI();
     }
-    
+
 
     handleMining = () => {
         this.minerals += 1;
@@ -136,30 +137,70 @@ class GameController {
         }
     };
 
+    // Buy a drone for a specific object
+    handleBuyDroneForObject(objectId) {
+        if (this.minerals >= this.currentDronePrice) {
+            this.minerals -= this.currentDronePrice;
+
+            // Initialize drone count for the object if it doesn't exist
+            if (!this.objectDrones[objectId]) {
+                this.objectDrones[objectId] = 0;
+            }
+
+            this.objectDrones[objectId] += 1; // Add a drone to the object
+            this.currentDronePrice = Math.ceil(10 * Math.pow(1.1, this.drones));
+            this.updateUI();
+        } else {
+            alert(`Not enough minerals! Need ${this.currentDronePrice} minerals.`);
+        }
+    }
+
+
+    drawBackground() {
+        const bgImage = new Image();
+        bgImage.src = '/static/assets/background.jpg'; // Update with your image path
+        bgImage.onload = () => {
+            this.ctx.drawImage(bgImage, 0, 0, this.canvas.width, this.canvas.height);
+        };
+    }
+
+
     startGameLoop() {
+        this.drawBackground();
         setInterval(() => this.updateGameState(), 1000);
     }
 
+    // Update game state to handle mining by object-specific drones
     updateGameState() {
-        if (this.drones > 0) {
-            this.minerals += this.drones * this.mineralsPerDrone * this.droneProductivityMultiplier;
-            this.minerals = Math.round(this.minerals * 10) / 10; // Keep one decimal
-            this.updateUI();
+        for (const objectId in this.objectDrones) {
+            const object = spaceMap.objects.find(obj => obj.id === objectId);
+            if (object) {
+                const drones = this.objectDrones[objectId];
+                const minedAmount = drones * this.mineralsPerDrone * this.droneProductivityMultiplier;
+                object.minerals = Math.max(0, object.minerals - minedAmount);
+
+                // Add minerals to player only if object has remaining resources
+                if (object.minerals > 0) {
+                    this.minerals += minedAmount;
+                }
+            }
         }
+
+        this.updateUI();
     }
 
     spawnSpaceJunk() {
         console.log("junk appeared");
-    
+
         // Define the spawn interval range (in milliseconds)
         let maxInterval = 7 * 60 * 1000; // 7 minutes
         const minInterval = 4 * 60 * 1000; // 4 minutes
         const cooldownTime = 10 * 1000; // 10 seconds cooldown after junk is clicked
-    
+
         const nextJunkTimer = document.getElementById('nextJunkTimer'); // Timer display element
         let timerInterval; // Declare a variable to store the timer interval ID
         let cooldownActive = false; // Cooldown flag
-    
+
         // Function to spawn space junk
         const spawn = () => {
             if (cooldownActive) {
@@ -171,16 +212,16 @@ class GameController {
                 }, cooldownTime);
                 return;
             }
-    
+
             // Clear any existing timer interval
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
-    
+
             // Create the junk container
             const junkContainer = document.createElement('div');
             junkContainer.style.position = 'absolute';
-    
+
             // Create the junk image
             const junk = document.createElement('div');
             junk.className = 'space-junk';
@@ -189,7 +230,7 @@ class GameController {
             junk.style.backgroundRepeat = "no-repeat";
             junk.style.width = "120px";
             junk.style.height = "120px";
-    
+
             // Create the countdown text
             const countdown = document.createElement('span');
             countdown.style.position = 'relative';
@@ -198,29 +239,29 @@ class GameController {
             countdown.style.color = 'white';
             countdown.style.fontSize = '12px';
             countdown.style.textAlign = 'center';
-    
+
             // Position the junk container randomly
             const containerWidth = this.spaceJunkContainer.offsetWidth;
             const containerHeight = this.spaceJunkContainer.offsetHeight;
             const randomX = Math.random() * (containerWidth - 50);
             const randomY = Math.random() * (containerHeight - 70); // Account for junk and text height
-    
+
             junkContainer.style.left = `${randomX}px`;
             junkContainer.style.top = `${randomY}px`;
-    
+
             // Attach junk and countdown to the container
             junkContainer.appendChild(junk);
             junkContainer.appendChild(countdown);
             this.spaceJunkContainer.appendChild(junkContainer);
-    
+
             // Countdown logic
             let timeLeft = 10; // 10 seconds
             countdown.textContent = `Time left: ${timeLeft}s`;
-    
+
             const countdownInterval = setInterval(() => {
                 timeLeft -= 1;
                 countdown.textContent = `Time left: ${timeLeft}s`;
-    
+
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
                     if (junkContainer.parentNode) {
@@ -228,29 +269,29 @@ class GameController {
                     }
                 }
             }, 1000);
-    
+
             // Handle click on junk
             junk.addEventListener('click', () => {
                 const reward = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000; // 1,000–10,000
                 this.minerals += reward;
                 this.updateUI();
-    
+
                 // Clear the countdown interval for this junk
                 clearInterval(countdownInterval);
                 if (junkContainer.parentNode) {
                     this.spaceJunkContainer.removeChild(junkContainer);
                 }
-    
+
                 // Activate cooldown
                 cooldownActive = true;
                 setTimeout(() => {
                     cooldownActive = false; // Cooldown ends after cooldownTime
                 }, cooldownTime);
-    
+
                 // Schedule the next spawn after the cooldown
                 setTimeout(spawn, Math.random() * maxInterval + minInterval);
             });
-    
+
             // Schedule next spawn and display timer
             const nextInterval = Math.random() * maxInterval + minInterval;
             let nextJunkTime = Math.floor(nextInterval / 1000); // Convert to seconds
@@ -258,40 +299,40 @@ class GameController {
             nextJunkTimer.style.position = 'fixed';
             nextJunkTimer.style.top = '10px';
             nextJunkTimer.style.left = '10px';
-    
+
             timerInterval = setInterval(() => {
                 nextJunkTime -= 1;
                 const minutes = Math.floor(nextJunkTime / 60);
                 const seconds = nextJunkTime % 60;
                 nextJunkTimer.textContent = `Next space junk in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    
+
                 if (nextJunkTime <= 0) {
                     clearInterval(timerInterval);
                 }
             }, 1000);
-    
+
             setTimeout(spawn, nextInterval);
         };
-    
+
         // Initial spawn
         spawn();
     }
-    
-    
-    
+
+
+
     // Research mechanic to reduce max interval
     spaceJunkDurationResearch() {
         const researchReduction = 30 * 1000; // Reduce by 30 seconds per research
         const minInterval = 4 * 60 * 1000; // Minimum 4 minutes
-    
+
         this.maxInterval = Math.max(this.maxInterval - researchReduction, minInterval);
         console.log(`Max interval reduced to: ${this.maxInterval / 1000 / 60} minutes`);
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
     updateUI() {
         this.mineralCount.textContent = this.minerals.toFixed(1);
