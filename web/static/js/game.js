@@ -1,5 +1,8 @@
 class GameController {
     constructor() {
+        this.canvas = document.getElementById('canvasId');
+        this.ctx = this.canvas.getContext('2d');
+
         // UI elements
         this.mineralCount = document.getElementById('mineralCount');
         this.droneCount = document.getElementById('droneCount');
@@ -48,6 +51,8 @@ class GameController {
                 },
             },
         ];
+
+        
 
         // Initialize
         this.initializeEventListeners();
@@ -154,15 +159,25 @@ class GameController {
             alert(`Not enough minerals! Need ${this.currentDronePrice} minerals.`);
         }
     }
-
-
     drawBackground() {
-        const bgImage = new Image();
-        bgImage.src = '/static/assets/background.jpg'; // Update with your image path
-        bgImage.onload = () => {
-            this.ctx.drawImage(bgImage, 0, 0, this.canvas.width, this.canvas.height);
-        };
+        return new Promise((resolve, reject) => {
+            const bgImage = new Image();
+            bgImage.src = '/static/assets/background.jpg'; // Ensure this path is correct
+            
+            bgImage.onload = () => {
+                console.log('Image loaded successfully:', bgImage.src);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(bgImage, 0, 0, this.canvas.width, this.canvas.height);
+                resolve(bgImage);
+            };
+        
+            bgImage.onerror = () => {
+                console.error('Failed to load background image:', bgImage.src);
+                reject(new Error('Image failed to load'));
+            };
+        });
     }
+    
 
 
     startGameLoop() {

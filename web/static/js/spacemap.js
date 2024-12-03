@@ -95,11 +95,15 @@ class SpaceMap {
         ctx.save();
         ctx.scale(this.zoomLevel, this.zoomLevel);
         ctx.translate(this.offsetX, this.offsetY);
-
+    
+        // Draw background
+        const bgImage = new Image();
+        bgImage.src = '/static/assets/background.jpg';
+        ctx.drawImage(bgImage, 0, 0, this.canvas.width, this.canvas.height);
+    
         // Draw objects
         this.objects.forEach(obj => {
             if (!obj.mined) {
-                // Draw the object
                 ctx.fillStyle = obj.color;
                 ctx.beginPath();
                 ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
@@ -107,34 +111,30 @@ class SpaceMap {
                 ctx.closePath();
             }
         });
-
+    
         // Draw hover tooltip
         if (this.hoveredObject) {
             const obj = this.hoveredObject;
-        
-            // Draw tooltip background
+    
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             const text = `${obj.minerals} minerals left`;
             const textWidth = ctx.measureText(text).width;
-        
-            // Position the tooltip below the object
+    
             const tooltipX = obj.x - textWidth / 2;
-            const tooltipY = obj.y + obj.radius + 10; // Adjust the offset as needed (10px below the object)
-        
-            // Draw tooltip background
+            const tooltipY = obj.y + obj.radius + 10;
+    
             ctx.fillRect(tooltipX - 5, tooltipY, textWidth + 10, 20);
-        
-            // Draw tooltip text
+    
             ctx.fillStyle = 'white';
             ctx.font = `${12 / this.zoomLevel}px Arial`;
             ctx.textAlign = 'center';
-            ctx.fillText(text, obj.x, tooltipY + 15); // Adjust text position within the background
+            ctx.fillText(text, obj.x, tooltipY + 15);
         }
-        
-
+    
         ctx.restore();
         requestAnimationFrame(this.render.bind(this));
     }
+    
 }
 
 
